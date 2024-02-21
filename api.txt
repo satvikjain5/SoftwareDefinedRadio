@@ -1,4 +1,4 @@
-Device Configuration boilerplate
+Device Configuration Boilerplate for bladeRF 2.0 micro
     
 
     (i) Acquire Device Handle
@@ -48,3 +48,17 @@ Device Configuration boilerplate
             unsigned int samplerate;
             int gain;
             };
+
+
+
+
+
+
+
+
+Synchronous 
+/* Receiving Samples */
+1) bladerf_enable_module() 
+2) bladerf_sync_config()
+3) bladerf_sync_rx()
+

@@ -15,6 +15,43 @@ struct channel_config {
  unsigned int samplerate;
  int gain;
 };
+
+
+static int init_sync(struct bladerf *dev){
+ int status;
+ const unsigned int num_buffers = 16;
+ const unsigned int buffer_size = 8192;
+ const unsigned int num_transfer = 8;
+ const unsigned int timeout_ms = 3500;
+
+
+ status = bladerf_sync_config(dev,BLADERF_RX_X2,BLADERF_FORMAT_SC16_Q11, num_buffers, buffer_size, num_transfers, stream_timeout);
+ if (status != 0){
+  fprintf(stderr, "Failed to configure RX sync interface: %s\n", bladerf_strerror(status));
+  return status;
+ }
+ return status;
+}
+
+int sync_rx_samples(struct bladerf *dev){
+ int status, ret;
+ bool done = false;
+ bool have_tx_data = false;
+
+ /* One sample = two int16_t values */
+ int16_t *rx_samples = NULL;
+ const unsigned int samples_len = 10000;
+
+ /* Allocate the buffer to store the samples */
+ rx_samples = malloc(samples_len * 2 * 1 * sizeof(int16_t));
+ if (rx_samples == NULL){
+  perror("malloc");
+  return BLADERF_ERR_MEM;
+ }
+
+
+}
+
 int configure_channel(struct bladerf *dev, struct channel_config *c)
 {
  int status;
@@ -110,9 +147,6 @@ int main(int argc, char *argv[])
  }
  
  /* Application code goes here.
- *
- * Don't forget to call bladerf_enable_module() before attempting to
- * transmit or receive samples!
  */
  printf("Hello world\n");
  
