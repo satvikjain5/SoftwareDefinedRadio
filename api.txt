@@ -30,4 +30,21 @@ Device Configuration boilerplate
             return 1;
             }
 
-    
+   
+
+   (ii) Configure Device Parameters
+          --> Prior to transmitting samples, configure Frequency, Gain, Sample Rate, Bandwidth
+
+        a) Channels: RX and TX channels are specified using BLADERF_CHANNEL_RX(**Insert channel number here **) and BLADERF_CHANNEL_TX(** Insert channel number here **) macros.
+        b) Selecting appropriate values: -> bladerf_set_gain() sets overall gain for the specified channel
+                                         -> bladerf_set_bandwidth() : if setting BW to 1.5MHz, then preferred sample rate would be 2MHz at a minimum, >=3.6MHz would be an even better choice
+   
+
+   /* Configure TX and RX channels independently for these parameters */
+            struct channel_config {
+            bladerf_channel channel;
+            unsigned int frequency;
+            unsigned int bandwidth;
+            unsigned int samplerate;
+            int gain;
+            };
