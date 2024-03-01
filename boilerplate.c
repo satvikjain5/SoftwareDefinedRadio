@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
- 
+#include <unistd.h>
 /* The RX and TX channels are configured independently for these parameters */
 struct channel_config {
  bladerf_channel channel;
@@ -49,7 +49,69 @@ int sync_rx_samples(struct bladerf *dev){
   return BLADERF_ERR_MEM;
  }
 
+ int16_t *tx_samples = NULL;
+ tx_samples = malloc(samples_len * 2 * 1 * sizeof(int16_t));
+ if (tx_samples == NULL){
+  perror("malloc");
+  return BLADERF_ERR_MEM;
+ }
 
+ status = init_sync(dev);
+ if (status != 0)
+ {
+  goto out;
+ }
+
+ status = bladerf_enable_module(dev, BLADERF_RX,true);
+ if (status != 0){
+  fprintf(stderr, "Failed to enable RX: %s\n",bladerf_strerror(status));
+  goto out;
+ }
+
+ status = bladerf_enable_module(dev, BLADERF_TX,true);
+ if (status != 0){
+  fprintf(stderr, "Failed to enable TX:%s\n", bladerf_strerror(status));
+  goto out;
+ }
+
+ while (status == 0 && !done){
+  status = bladerf_sync_rx(dev, rx_samples, samples_len, NULL, 5000);
+ }
+ 
+ if (status == 0) {
+  /* Process these samples and potentially produce a response to transmit */
+ }
+ if (!done && have_tx_data){
+  /* Transmit a response */
+  status = bladerf_sync_tx(dev, tx_samples, samples_len, NULL, 5000);
+  if (status != 0){
+   fprintf(stderr, "Failed to TX samples: %s\n",bladerf_strerror(status));
+  }
+  else {
+   fprintf(stderr, "Failed to RX sampples: %s\n",bladerf_strerror(status));
+  }
+ }
+
+ if (status == 0){
+  /* Wait a few seconds for any remaining TX samples to finish reaching the RF front end */
+  usleep(20000);
+ }
+out:
+ ret = status;
+ /* Disable RX, shutting down underlying RX stream */
+ status = bladerf_enable_module(dev, BLADERF_RX, false);
+ if (status != 0){
+  fprintf(stderr, "Failed to disable RX: %s\n", bladerf_strerror(status));
+ }
+
+ status = bladerf_enable_module(dev, BLADERF_TX, false);
+ if (status != 0){
+  fprintf(stderr, "Failed to disable TX: %s\n", bladerf_strerror(status));
+ }
+
+ free(rx_samples);
+ free(tx_samples);
+ return ret;
 }
 
 int configure_channel(struct bladerf *dev, struct channel_config *c)
@@ -92,8 +154,7 @@ int configure_channel(struct bladerf *dev, struct channel_config *c)
  }
  else {
   printf("Gain = %u\n", c->gain);
- }
- 
+ } 
  return status;
 }
  
@@ -163,11 +224,7 @@ int main(int argc, char *argv[])
   printf("Configuring TX channel...\n");
  }
  
- /* Application code goes here.
- */
- for (int i = 0; i < 10; i++){
-  printf("%d\n",i);
- }
+ /* Application code goes here. */
  
 out:
  bladerf_close(dev);
