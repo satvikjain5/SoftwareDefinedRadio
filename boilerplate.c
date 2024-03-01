@@ -25,7 +25,7 @@ static int init_sync(struct bladerf *dev){
  const unsigned int timeout_ms = 3500;
 
 
- status = bladerf_sync_config(dev,BLADERF_RX_X2,BLADERF_FORMAT_SC16_Q11, num_buffers, buffer_size, num_transfers, stream_timeout);
+ status = bladerf_sync_config(dev,BLADERF_RX_X2,BLADERF_FORMAT_SC16_Q11, num_buffers, buffer_size, num_transfer, timeout_ms);
  if (status != 0){
   fprintf(stderr, "Failed to configure RX sync interface: %s\n", bladerf_strerror(status));
   return status;
@@ -62,12 +62,18 @@ int configure_channel(struct bladerf *dev, struct channel_config *c)
  bladerf_strerror(status));
  return status;
  }
+ else {
+  printf("Frequency = %u\n", c->frequency);
+ }
  
  status = bladerf_set_sample_rate(dev, c->channel, c->samplerate, NULL);
  if (status != 0) {
  fprintf(stderr, "Failed to set samplerate = %u: %s\n", c->samplerate,
  bladerf_strerror(status));
  return status;
+ }
+ else {
+  printf("Sample rate = %u\n", c->samplerate);
  }
  
  status = bladerf_set_bandwidth(dev, c->channel, c->bandwidth, NULL);
@@ -76,11 +82,16 @@ int configure_channel(struct bladerf *dev, struct channel_config *c)
  bladerf_strerror(status));
  return status;
  }
- 
+ else {
+  printf("Bandwidth = %u\n", c->bandwidth);
+ }
  status = bladerf_set_gain(dev, c->channel, c->gain);
  if (status != 0) {
  fprintf(stderr, "Failed to set gain: %s\n", bladerf_strerror(status));
  return status;
+ }
+ else {
+  printf("Gain = %u\n", c->gain);
  }
  
  return status;
@@ -132,6 +143,9 @@ int main(int argc, char *argv[])
  fprintf(stderr, "Failed to configure RX channel. Exiting.\n");
  goto out;
  }
+ else {
+  printf("Configuring RX channel...\n");
+ }
  
  /* Set up TX channel parameters */
  config.channel = BLADERF_CHANNEL_TX(0);
@@ -145,10 +159,15 @@ int main(int argc, char *argv[])
  fprintf(stderr, "Failed to configure TX channel. Exiting.\n");
  goto out;
  }
+ else {
+  printf("Configuring TX channel...\n");
+ }
  
  /* Application code goes here.
  */
- printf("Hello world\n");
+ for (int i = 0; i < 10; i++){
+  printf("%d\n",i);
+ }
  
 out:
  bladerf_close(dev);
