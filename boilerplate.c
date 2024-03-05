@@ -32,6 +32,18 @@ static int init_sync(struct bladerf *dev){
   fprintf(stderr, "Failed to configure RX sync interface: %s\n", bladerf_strerror(status));
   return status;
  }
+ else {
+  printf("Successfully configured RX sync interface!\n");
+ }
+ 
+ status = bladerf_sync_config(dev, BLADERF_TX_X2,BLADERF_FORMAT_SC16_Q11,num_buffers, buffer_size, num_transfer, timeout_ms);
+ if (status != 0){ 
+  fprintf(stderr, "Failed to configure TX sync interface: %s\n", bladerf_strerror(status));
+  return status;
+ }
+ else {
+  printf("Successfully configured TX sync interface!\n");
+ }
  return status;
 }
 
@@ -69,11 +81,17 @@ int sync_rx_samples(struct bladerf *dev){
   fprintf(stderr, "Failed to enable RX: %s\n",bladerf_strerror(status));
   goto out;
  }
+ else{
+  printf("Succesfully configured RX!");
+ }
 
  status = bladerf_enable_module(dev, BLADERF_TX,true);
  if (status != 0){
   fprintf(stderr, "Failed to enable TX:%s\n", bladerf_strerror(status));
   goto out;
+ }
+ else{
+  printf("Successfully configured TX!");
  }
 
  while (status == 0 && !done){
@@ -82,15 +100,19 @@ int sync_rx_samples(struct bladerf *dev){
  
  if (status == 0) {
   /* Process these samples and potentially produce a response to transmit */
+  printf("\nI am here\n");
  }
  if (!done && have_tx_data){
+  for (int i = 0 ; i < 10; i++){
+   printf("%d\n",i);
+  }
   /* Transmit a response */
   status = bladerf_sync_tx(dev, tx_samples, samples_len, NULL, 5000);
   if (status != 0){
    fprintf(stderr, "Failed to TX samples: %s\n",bladerf_strerror(status));
   }
   else {
-   fprintf(stderr, "Failed to RX sampples: %s\n",bladerf_strerror(status));
+   fprintf(stderr, "Failed to RX samples: %s\n",bladerf_strerror(status));
   }
  }
 
@@ -105,10 +127,17 @@ out:
  if (status != 0){
   fprintf(stderr, "Failed to disable RX: %s\n", bladerf_strerror(status));
  }
+ else {
+  printf("\nSucessfully disabled RX!");
+ }
+
 
  status = bladerf_enable_module(dev, BLADERF_TX, false);
  if (status != 0){
   fprintf(stderr, "Failed to disable TX: %s\n", bladerf_strerror(status));
+ }
+ else{
+  printf("\nSuccessfully disabled TX!\n");
  }
 
  free(rx_samples);
@@ -199,7 +228,7 @@ int main(int argc, char *argv[])
  config.frequency = 910000000;
  config.bandwidth = 2000000;
  config.samplerate = 2.4e6;
- config.gain = 39;
+ config.gain = 0;
  
  status = configure_channel(dev, &config);
  if (status != 0) {
@@ -207,7 +236,7 @@ int main(int argc, char *argv[])
  goto out;
  }
  else {
-  printf("Configuring RX channel...\n");
+  printf("Configuring RX channel ...\n");
  }
  
  /* Set up TX channel parameters */
@@ -215,7 +244,7 @@ int main(int argc, char *argv[])
  config.frequency = 918000000;
  config.bandwidth = 1500000;
  config.samplerate = 2.4e6;
- config.gain = -14;
+ config.gain = 0;
  
  status = configure_channel(dev, &config);
  if (status != 0) {
@@ -223,10 +252,12 @@ int main(int argc, char *argv[])
  goto out;
  }
  else {
-  printf("Configuring TX channel...\n");
+  printf("Configuring TX channel ...\n");
  }
  
  /* Application code goes here. */
+ init_sync(dev);
+ sync_rx_samples(dev);
  
 out:
  bladerf_close(dev);

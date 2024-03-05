@@ -50,12 +50,6 @@ Device Configuration Boilerplate for bladeRF 2.0 micro
             };
 
 
-
-
-
-
-
-
 Synchronous 
 /* Receiving Samples */
 1) bladerf_enable_module() 

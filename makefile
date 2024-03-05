@@ -1,10 +1,13 @@
 CC = gcc
-TARGET = boilerplate
+TARGET1 = boilerplate
+TARGET2 = rx
+boilerplate: boilerplate.c
+	$(CC) boilerplate.c -o $(TARGET1) -lbladeRF
 
-all:
-	$(CC) boilerplate.c -o $(TARGET) -lbladeRF
+rx: rx.c
+	$(CC) rx.c -o rx -lbladeRF
 
 clean:
-	rm $(TARGET)
+	rm $(TARGET1) $(TARGET2)
 
 
