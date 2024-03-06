@@ -13,6 +13,9 @@ unsigned int bandwidth;
 unsigned int samplerate;
 int gain;
 };
+const unsigned samples_len = 10000;
+int16_t *rx_samples = NULL;
+usigned int 
 
 static int init_sync_rx(struct bladerf *dev){
   int status;
@@ -23,11 +26,11 @@ static int init_sync_rx(struct bladerf *dev){
 
   status = bladerf_sync_config(dev, BLADERF_RX_X2, BLADERF_FORMAT_SC16_Q11, num_buffers, buffer_size, num_transfers, timeout_ms);
   if (status != 0){
-    fprintf(stderr, "Failed to configure TX sync interface: %s\n", bladerf_strerror(status));
+    fprintf(stderr, "Failed to configure RX sync interface: %s\n", bladerf_strerror(status));
     return status;    
   }
   else {
-    printf("Successfully configured TX sync interface!\n");
+    printf("Successfully configured RX sync interface!\n");
   }
   return status;
 }
@@ -104,6 +107,7 @@ int main(int argc, char* argv[])
     return 1;
   }
   init_sync_rx(dev);
+
 
 }
 
